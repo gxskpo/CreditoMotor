@@ -2,7 +2,7 @@
 
 namespace Aguacate;
 
-public class Data(
+public struct Data(
     Dictionary<string, Dictionary<string, int[]>?> masc,
     Dictionary<string, Dictionary<string, int[]>?> fem)
 {
@@ -10,24 +10,12 @@ public class Data(
     public Dictionary<string, Dictionary<string, int[]>?> Fem { get; } = fem;
 }
 
-public class Result(int maximo, int minimo, double optimo)
-{
-    public int Maximo { get; } = maximo;
-    public int Minimo { get; } = minimo;
-    public double Optimo { get; } = optimo;
-
-    public void Print()
-    {
-        Console.WriteLine($"Maximo: {Maximo} Minimo: {Minimo} Óptimo: {Optimo}");
-    }
-}
-
 public class Motorcito
 {
     private static Data? DictData { get; set; }
 
-    public const int MaximoMasc = 30;
-    public const int MaximoFem = 28;
+    private const int MaximoMasc = 30;
+    private const int MaximoFem = 28;
 
 
     private static double GetOptimal(int min, int max)
@@ -43,22 +31,27 @@ public class Motorcito
         return Math.Min(res, limit).ToString();
     }
 
-    public Result CalculoMotor(string tipoNomina, DateTime fechaPrimerEmpleo, string genero)
+    static void PrintResult(int min, int max, double optimo)
+    {
+        Console.WriteLine($"Maximo: {max} Minimo: {min} Óptimo: {optimo}");
+    }
+
+    public void CalculoMotor(char tipoNomina, DateTime fechaPrimerEmpleo, char genero)
     {
         DateTime today = DateTime.Now;
-        Dictionary<string, Dictionary<string, int[]>?> dict = genero == "F" ? DictData!.Fem : DictData!.Masc;
-        int limit = genero == "F" ? MaximoFem : MaximoMasc;
+        Dictionary<string, Dictionary<string, int[]>?> dict =
+            genero == 'F' ? DictData!.Value.Fem : DictData!.Value.Masc;
+        int limit = genero == 'F' ? MaximoFem : MaximoMasc;
         string experience = GetMonthDifference(today, fechaPrimerEmpleo, limit);
-
         bool exists = dict.TryGetValue(experience, out var data);
         if (!exists)
         {
             data = dict["0"];
         }
 
-        int min = data![tipoNomina][0];
-        int max = data[tipoNomina][1];
-        return new Result(min, max, GetOptimal(min, max));
+        int min = data![tipoNomina.ToString()][0];
+        int max = data[tipoNomina.ToString()][1];
+        PrintResult(min, max, GetOptimal(min, max));
     }
 
     public Motorcito(string fileName)
@@ -80,9 +73,9 @@ public abstract class Program
     public static void Main(string[] args)
     {
         Motorcito motor = new("./z.json");
-        motor.CalculoMotor("A", new DateTime(2022, 6, 12), "F").Print();
-        motor.CalculoMotor("B", new DateTime(1993, 12, 30), "F").Print();
-        motor.CalculoMotor("C", new DateTime(2020, 9, 19), "M").Print();
-        motor.CalculoMotor("D", new DateTime(2019, 1, 15), "M").Print();
+        motor.CalculoMotor('A', new DateTime(2022, 6, 12), 'F');
+        motor.CalculoMotor('B', new DateTime(1993, 12, 30), 'F');
+        motor.CalculoMotor('C', new DateTime(2020, 9, 19), 'M');
+        motor.CalculoMotor('D', new DateTime(2019, 1, 15), 'M');
     }
 }
